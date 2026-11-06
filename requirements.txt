@@ -1,3 +1,7 @@
-streamlit
+streamlit==1.36.0
 pandas==2.2.2
 plotly==5.22.0
+SQLAlchemy==2.0.31
+# Untuk PostgreSQL (uncomment jika pakai postgres)
+# psycopg2-binary==2.9.9
+python-dotenv==1.0.1
