@@ -17,7 +17,91 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+# ==================== MOBILE CSS INJECTION ====================
+MOBILE_CSS = """
+<style>
+/* ---------- Global mobile-friendly ---------- */
+@media (max-width: 768px) {
+    /* Container padding lebih kecil */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        max-width: 100% !important;
+    }
+    /* Sembunyikan header Streamlit */
+    header[data-testid="stHeader"] { display: none !important; }
+    /* Metric card lebih compact */
+    div[data-testid="stMetricValue"] {
+        font-size: 1.1rem !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.75rem !important;
+    }
+    /* Font header lebih kecil */
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    /* Tombol full width */
+    .stButton > button {
+        width: 100% !important;
+        min-height: 44px !important; /* touch target */
+    }
+    /* Input lebih tinggi untuk thumb */
+    input, select, textarea {
+        font-size: 16px !important; /* cegah auto-zoom iOS */
+        min-height: 44px !important;
+    }
+    /* Tabel scroll horizontal */
+    div[data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+    }
+    /* Sidebar lebih lebar saat terbuka di mobile */
+    section[data-testid="stSidebar"] {
+        min-width: 280px !important;
+    }
+    /* Plotly chart responsif */
+    .js-plotly-plot { max-width: 100% !important; }
+    /* Sembunyikan footer */
+    footer { display: none !important; }
+    /* Form spacing lebih rapat */
+    div[data-testid="stForm"] {
+        padding: 0.75rem !important;
+        border-radius: 12px !important;
+    }
+    /* Expander lebih compact */
+    details summary {
+        font-size: 0.95rem !important;
+        padding: 0.5rem !important;
+    }
+    /* Tabs */
+    button[data-baseweb="tab"] {
+        font-size: 0.85rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+}
 
+/* ---------- Tablet ---------- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .block-container { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+}
+
+/* ---------- PWA safe area (notch) ---------- */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .block-container {
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+    }
+}
+
+/* ---------- App-like feel ---------- */
+/* Hilangkan shadow scrollbar Streamlit */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+</style>
+"""
+st.markdown(MOBILE_CSS, unsafe_allow_html=True)
 # Init DB sekali per proses
 @st.cache_resource
 def _init():
