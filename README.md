@@ -18,3 +18,4 @@ Mencakup siklus akuntansi lengkap: penjualan, pembelian, jurnal, buku besar, ner
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
+https://toko-bangunan-accounting-vvivimjxpmhcexg32gr6re.streamlit.app/
