@@ -1,4 +1,8 @@
-pycache/
-.pyc
-.streamlit/
-data/.csv
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+.env
+data/*.csv
+data/*.db
+data/*.db-journal
+*.sqlite3
