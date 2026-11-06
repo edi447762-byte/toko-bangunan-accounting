@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#F59E0B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Toko Bangunan" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Aplikasi akuntansi usaha dagang bahan bangunan" />
+
+  <title>Toko Bangunan</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png" />
+  <link rel="apple-touch-icon" href="/static/icon-192.png" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #FFFFFF;
+      /* Support notch iPhone */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Splash screen saat loading */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      z-index: 9999;
+      transition: opacity 0.4s ease-out;
+    }
+    #splash.hide { opacity: 0; pointer-events: none; }
+    #splash .icon { font-size: 80px; margin-bottom: 16px; animation: pop 0.6s ease-out; }
+    #splash h1 { font-size: 22px; margin-bottom: 8px; }
+    #splash p { font-size: 14px; opacity: 0.9; }
+    #splash .spinner {
+      margin-top: 24px;
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tombol install (muncul kalau belum install) */
+    #install-banner {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: #1F2937;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      z-index: 10000;
+      font-size: 14px;
+    }
+    #install-banner.show { display: flex; }
+    #install-banner button {
+      background: #F59E0B;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+    #install-banner .close {
+      background: transparent;
+      font-size: 20px;
+      padding: 0 8px;
+      color: #9CA3AF;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash">
+    <div class="icon">🏗️</div>
+    <h1>Toko Bangunan</h1>
+    <p>Memuat aplikasi...</p>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Iframe Streamlit -->
+  <iframe
+    id="app"
+    src="http://localhost:8501"
+    title="Toko Bangunan App"
+    allow="clipboard-write; fullscreen"
+  ></iframe>
+
+  <!-- Install Banner -->
+  <div id="install-banner">
+    <span>📱 Pasang aplikasi di homescreen?</span>
+    <div>
+      <button id="btn-install">Pasang</button>
+      <button class="close" id="btn-close">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // ==============================================
+    // 1. Register Service Worker
+    // ==============================================
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/static/sw.js', { scope: '/' })
+        .then((reg) => console.log('✅ SW registered:', reg.scope))
+        .catch((err) => console.warn('❌ SW gagal:', err));
+    }
+
+    // ==============================================
+    // 2. Hide splash saat iframe load
+    // ==============================================
+    const iframe = document.getElementById('app');
+    const splash = document.getElementById('splash');
+
+    iframe.addEventListener('load', () => {
+      setTimeout(() => splash.classList.add('hide'), 300);
+    });
+
+    // Fallback: kalau iframe 8 detik belum load, tetap hide splash
+    setTimeout(() => splash.classList.add('hide'), 8000);
+
+    // ==============================================
+    // 3. Install prompt (Android Chrome)
+    // ==============================================
+    let deferredPrompt;
+    const banner = document.getElementById('install-banner');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Munculkan banner kalau belum pernah ditutup
+      if (!localStorage.getItem('install-dismissed')) {
+        banner.classList.add('show');
+      }
+    });
+
+    document.getElementById('btn-install').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('Install outcome:', outcome);
+      deferredPrompt = null;
+      banner.classList.remove('show');
+    });
+
+    document.getElementById('btn-close').addEventListener('click', () => {
+      banner.classList.remove('show');
+      localStorage.setItem('install-dismissed', '1');
+    });
+
+    // ==============================================
+    // 4. Deteksi iOS — tampilkan instruksi manual
+    // ==============================================
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                        || window.navigator.standalone === true;
+
+    if (isIOS && !isStandalone && !localStorage.getItem('ios-banner-dismissed')) {
+      banner.innerHTML = `
+        <span>📱 Pasang: tap <b>Bagikan</b> → <b>Add to Home Screen</b></span>
+        <button class="close" id="btn-close-ios">✕</button>
+      `;
+      banner.classList.add('show');
+      document.getElementById('btn-close-ios').onclick = () => {
+        banner.classList.remove('show');
+        localStorage.setItem('ios-banner-dismissed', '1');
+      };
+    }
+
+    // ==============================================
+    // 5. Refresh iframe saat online kembali
+    // ==============================================
+    window.addEventListener('online', () => {
+      console.log('🌐 Online kembali, reload app.');
+      iframe.src = iframe.src;
+    });
+
+    // ==============================================
+    // 6. Handle back button (agar tidak keluar aplikasi)
+    // ==============================================
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', () => {
+      history.pushState(null, '', location.href);
+    });
+  </script>
+</body>
+</html>
