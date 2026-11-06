@@ -1,4 +1,5 @@
 # 🏗️ Aplikasi Akuntansi Usaha Dagang Bahan Bangunan
+### https://toko-bangunan-accounting-vvivimjxpmhcexg32gr6re.streamlit.app/
 
 Aplikasi akuntansi berbasis web untuk usaha dagang bahan bangunan, dibuat dengan **Streamlit**. 
 Mencakup siklus akuntansi lengkap: penjualan, pembelian, jurnal, buku besar, neraca saldo, laba rugi, dan neraca.
@@ -18,4 +19,3 @@ Mencakup siklus akuntansi lengkap: penjualan, pembelian, jurnal, buku besar, ner
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-https://toko-bangunan-accounting-vvivimjxpmhcexg32gr6re.streamlit.app/
